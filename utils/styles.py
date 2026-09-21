@@ -85,3 +85,32 @@ with c3:
         '<span style="color:#888;font-size:13px">Atualizado toda segunda-feira</span></div>',
         unsafe_allow_html=True
     )
+
+
+from html import escape
+import streamlit as st
+
+def render_alert(message, kind="info"):
+    icons = {"info": "i", "success": "✓", "warning": "!", "error": "!"}
+    kind = kind if kind in icons else "info"
+    st.markdown(
+        '<div class="doma-alert doma-alert-' + kind + '">' +
+        '<span class="doma-alert-icon">' + icons[kind] + '</span>' +
+        '<span>' + escape(str(message)) + '</span></div>',
+        unsafe_allow_html=True
+    )
+
+def render_table(data, use_container_width=True, hide_index=True):
+    import pandas as pd
+    if isinstance(data, pd.DataFrame) and not data.empty:
+        st.dataframe(data, use_container_width=use_container_width, hide_index=hide_index)
+
+def render_navigation(active="app"):
+    st.page_link("app.py",                       label="Inicio")
+    st.page_link("pages/1_Visao_Geral.py",       label="Visao Geral")
+    st.page_link("pages/2_Funil.py",             label="Funil")
+    st.page_link("pages/3_Financeiro.py",        label="Financeiro")
+    st.page_link("pages/4_Operacional.py",       label="Operacional")
+    st.page_link("pages/5_Promocoes.py",         label="Promocoes")
+    st.page_link("pages/6_Clientes.py",          label="Clientes")
+    st.page_link("pages/7_Chamados.py",          label="Chamados")
