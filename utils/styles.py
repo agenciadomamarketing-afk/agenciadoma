@@ -106,11 +106,12 @@ def render_table(data, use_container_width=True, hide_index=True):
         st.dataframe(data, use_container_width=use_container_width, hide_index=hide_index)
 
 def render_navigation(active="app"):
-    st.page_link("app.py",                       label="Inicio")
-    st.page_link("pages/1_Visao_Geral.py",       label="Visao Geral")
-    st.page_link("pages/2_Funil.py",             label="Funil")
-    st.page_link("pages/3_Financeiro.py",        label="Financeiro")
-    st.page_link("pages/4_Operacional.py",       label="Operacional")
-    st.page_link("pages/5_Promocoes.py",         label="Promocoes")
-    st.page_link("pages/6_Clientes.py",          label="Clientes")
-    st.page_link("pages/7_Chamados.py",          label="Chamados")
+  st.page_link("app.py", label="Inicio")
+st.page_link("pages/1_Visao_Geral.py", label="Visao Geral")
+st.page_link("pages/2_Funil.py", label="Funil")
+st.page_link("pages/3_Financeiro.py", label="Financeiro")
+st.page_link("pages/4_Operacional.py", label="Operacional")
+st.page_link("pages/5_Promocoes.py", label="Promocoes")
+st.page_link("pages/6_Clientes.py", label="Clientes")
+st.page_link("pages/7_Chamados.py", label="Chamados")
+
