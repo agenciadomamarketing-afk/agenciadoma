@@ -4,7 +4,7 @@ import pathlib
 from datetime import date
 from utils.auth import check_login, logout
 from utils.data import load_all, get_stores
-from utils.styles import GLOBAL_CSS
+from utils.styles import GLOBAL_CSS, render_alert, render_table, render_navigation
 
 st.set_page_config(
     page_title="Doma Food",
@@ -52,6 +52,8 @@ with st.sidebar:
                            key="end_global", label_visibility="collapsed")
     st.caption(str(sd) + " -> " + str(ed))
     st.markdown("---")
+    render_navigation()
+    st.markdown("---")
     if st.button("Sair", use_container_width=True):
         logout()
 
@@ -63,21 +65,21 @@ n = len(stores) if stores else 0
 c1, c2, c3 = st.columns(3)
 with c1:
     st.markdown(
-        '<div style="background:' + CARD + ';border-radius:12px;padding:20px;border-top:3px solid ' + RED + '">' +
+        '<div class="doma-home-card">' +
         '<b>Visao Geral</b><br>' +
         '<span style="color:#888;font-size:13px">KPIs + comparacao mes anterior</span></div>',
         unsafe_allow_html=True
     )
 with c2:
     st.markdown(
-        '<div style="background:' + CARD + ';border-radius:12px;padding:20px;border-top:3px solid ' + GRN + '">' +
+        '<div class="doma-home-card">' +
         '<b>' + str(n) + ' lojas ativas</b><br>' +
         '<span style="color:#888;font-size:13px">Selecione no menu lateral</span></div>',
         unsafe_allow_html=True
     )
 with c3:
     st.markdown(
-        '<div style="background:' + CARD + ';border-radius:12px;padding:20px;border-top:3px solid ' + YLW + '">' +
+        '<div class="doma-home-card">' +
         '<b>Google Sheets</b><br>' +
         '<span style="color:#888;font-size:13px">Atualizado toda segunda-feira</span></div>',
         unsafe_allow_html=True

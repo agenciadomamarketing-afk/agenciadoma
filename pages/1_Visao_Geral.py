@@ -6,7 +6,7 @@ from datetime import date, datetime
 from utils.auth import check_login, logout
 from utils.data import load_all, get_stores, agg, prev, delta
 from utils.charts import kpi, trend
-from utils.styles import GLOBAL_CSS
+from utils.styles import GLOBAL_CSS, render_alert, render_table, render_navigation
 
 st.set_page_config(page_title="Visao Geral · Doma", page_icon="assets/logo_doma_white.png", layout="wide")
 st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
@@ -35,10 +35,12 @@ with st.sidebar:
                            key="end_global", label_visibility="collapsed")
     st.caption(str(sd) + " -> " + str(ed))
     st.markdown("---")
+    render_navigation("Visao_Geral")
+    st.markdown("---")
     if st.button("Sair", use_container_width=True):
         logout()
 if not loja:
-    st.warning("Selecione uma loja no menu lateral.")
+    render_alert("Selecione uma loja no menu lateral.", "warning")
     st.stop()
 
 s = datetime.combine(sd, datetime.min.time())
@@ -82,20 +84,20 @@ if not ldf.empty:
         st.plotly_chart(trend(ldf, "data_inicio",
             ["fat_bruto","fat_liquido","repasse"],
             ["Fat. Bruto","Fat. Liquido","Repasse"],
-            "Evolucao Financeira"), use_container_width=True)
+            "Evolucao Financeira"), use_container_width=True, theme=None)
     with t2:
         st.plotly_chart(trend(ldf, "data_inicio",
             ["pedidos","clientes_novos","cancelamentos"],
             ["Pedidos","Clientes Novos","Cancelamentos"],
-            "Volume de Pedidos"), use_container_width=True)
+            "Volume de Pedidos"), use_container_width=True, theme=None)
 
 st.markdown("---")
 fat_b = cur.get("fat_bruto", 0)
 fat_l = cur.get("fat_liquido", 0)
 pct   = fat_l / fat_b if fat_b > 0 else 0
 if pct >= 0.40:
-    st.success("Fat. liquido = {:.1%} do bruto. Margem saudavel.".format(pct))
+    render_alert("Fat. liquido = {:.1%} do bruto. Margem saudavel.".format(pct), "success")
 elif pct >= 0.30:
-    st.warning("Fat. liquido = {:.1%} do bruto. Margem apertada.".format(pct))
+    render_alert("Fat. liquido = {:.1%} do bruto. Margem apertada.".format(pct), "warning")
 elif fat_b > 0:
-    st.error("Fat. liquido = {:.1%} do bruto. Verificar taxas e promocoes.".format(pct))
+    render_alert("Fat. liquido = {:.1%} do bruto. Verificar taxas e promocoes.".format(pct), "error")

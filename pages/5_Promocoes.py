@@ -7,7 +7,7 @@ from datetime import date, datetime
 from utils.auth import check_login, logout
 from utils.data import load_all, get_stores, fp
 from utils.charts import kpi
-from utils.styles import GLOBAL_CSS
+from utils.styles import GLOBAL_CSS, render_alert, render_table, render_navigation
 
 st.set_page_config(page_title="Promocoes · Doma", page_icon="assets/logo_doma_white.png", layout="wide")
 st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
@@ -36,10 +36,12 @@ with st.sidebar:
                            key="end_global", label_visibility="collapsed")
     st.caption(str(sd) + " -> " + str(ed))
     st.markdown("---")
+    render_navigation("Promocoes")
+    st.markdown("---")
     if st.button("Sair", use_container_width=True):
         logout()
 if not loja:
-    st.warning("Selecione uma loja no menu lateral.")
+    render_alert("Selecione uma loja no menu lateral.", "warning")
     st.stop()
 
 s = datetime.combine(sd, datetime.min.time())
@@ -56,7 +58,7 @@ st.caption(str(loja) + "  ·  " + str(sd) + " → " + str(ed))
 st.markdown("---")
 
 if df.empty:
-    st.info("Sem dados de campanha para este periodo.")
+    render_alert("Sem dados de campanha para este periodo.", "info")
     st.stop()
 
 for c in ["pedidos","subsidio_loja"]:
@@ -85,13 +87,13 @@ cols = [c for c in ["campanha","tipo","pedidos","subsidio_loja","veredito"] if c
 st.markdown("---")
 st.markdown("### Ranking de Campanhas")
 if "pedidos" in df.columns:
-    st.dataframe(df[cols].sort_values("pedidos", ascending=False),
+    render_table(df[cols].sort_values("pedidos", ascending=False),
                  use_container_width=True, hide_index=True)
 
 st.markdown("---")
 pausar = df[df["veredito"].str.contains("Pausar", na=False)]
 manter = df[df["veredito"].str.contains("Manter", na=False)]
 if not pausar.empty:
-    st.error("Pausar: " + ", ".join(pausar["campanha"].tolist()[:3]))
+    render_alert("Pausar: " + ", ".join(pausar["campanha"].tolist()[:3]), "error")
 if not manter.empty:
-    st.success("Manter: " + ", ".join(manter["campanha"].tolist()[:3]))
+    render_alert("Manter: " + ", ".join(manter["campanha"].tolist()[:3]), "success")

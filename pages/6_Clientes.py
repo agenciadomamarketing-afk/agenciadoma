@@ -6,8 +6,8 @@ import base64
 from datetime import date, datetime
 from utils.auth import check_login, logout
 from utils.data import load_all, get_stores, agg, prev, delta
-from utils.charts import kpi, trend
-from utils.styles import GLOBAL_CSS
+from utils.charts import style_figure, kpi, trend
+from utils.styles import GLOBAL_CSS, render_alert, render_table, render_navigation
 
 st.set_page_config(page_title="Clientes · Doma", page_icon="assets/logo_doma_white.png", layout="wide")
 st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
@@ -36,10 +36,12 @@ with st.sidebar:
                            key="end_global", label_visibility="collapsed")
     st.caption(str(sd) + " -> " + str(ed))
     st.markdown("---")
+    render_navigation("Clientes")
+    st.markdown("---")
     if st.button("Sair", use_container_width=True):
         logout()
 if not loja:
-    st.warning("Selecione uma loja no menu lateral.")
+    render_alert("Selecione uma loja no menu lateral.", "warning")
     st.stop()
 
 s = datetime.combine(sd, datetime.min.time())
@@ -66,25 +68,27 @@ with c4: st.markdown(kpi("Total Pedidos", str(ped), delta(ped, pv.get("pedidos",
 
 st.markdown("---")
 if pct > 0.65:
-    st.error("ALERTA DE RETENCAO: {:.1%} dos pedidos sao de clientes novos. Criar estrategia de fidelizacao.".format(pct))
+    render_alert("ALERTA DE RETENCAO: {:.1%} dos pedidos sao de clientes novos. Criar estrategia de fidelizacao.".format(pct), "error")
 elif pct > 0.45:
-    st.warning("{:.1%} dos pedidos sao de clientes novos. Monitorar retencao.".format(pct))
+    render_alert("{:.1%} dos pedidos sao de clientes novos. Monitorar retencao.".format(pct), "warning")
 else:
-    st.success("{:.1%} de pedidos novos. Base recorrente saudavel.".format(pct))
+    render_alert("{:.1%} de pedidos novos. Base recorrente saudavel.".format(pct), "success")
 
 c1, c2 = st.columns(2)
 with c1:
     fig = go.Figure(go.Pie(
         labels=["Clientes Novos","Recorrentes"], values=[novos, recorr], hole=0.5,
-        marker=dict(colors=["#E91D2B","#1DB954"]), textinfo="label+percent"
+        marker=dict(colors=["#E91D2B","#BBC5D6"]), textinfo="label+percent"
     ))
     fig.update_layout(paper_bgcolor="#1A1A1A", font=dict(color="#FFFFFF"),
                       height=300, margin=dict(l=0,r=0,t=20,b=0), showlegend=False)
-    st.plotly_chart(fig, use_container_width=True)
+    style_figure(fig)
+    st.plotly_chart(fig, use_container_width=True, theme=None)
 with c2:
     ldf = df[df["loja_nome"] == loja].copy() if "loja_nome" in df.columns else pd.DataFrame()
     if not ldf.empty:
         ldf["data_inicio"] = pd.to_datetime(ldf["data_inicio"], errors="coerce")
         ldf["clientes_novos"] = pd.to_numeric(ldf.get("clientes_novos", 0), errors="coerce")
         st.plotly_chart(trend(ldf.sort_values("data_inicio"), "data_inicio",
-            ["clientes_novos"], ["Clientes Novos"], "Evolucao"), use_container_width=True)
+            ["clientes_novos"], ["Clientes Novos"], "Evolucao"), use_container_width=True, theme=None)
+

@@ -6,7 +6,7 @@ from datetime import date, datetime
 from utils.auth import check_login, logout
 from utils.data import load_all, get_stores, agg, prev, delta
 from utils.charts import kpi, gauge, trend
-from utils.styles import GLOBAL_CSS
+from utils.styles import GLOBAL_CSS, render_alert, render_table, render_navigation
 
 st.set_page_config(page_title="Operacional · Doma", page_icon="assets/logo_doma_white.png", layout="wide")
 st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
@@ -35,10 +35,12 @@ with st.sidebar:
                            key="end_global", label_visibility="collapsed")
     st.caption(str(sd) + " -> " + str(ed))
     st.markdown("---")
+    render_navigation("Operacional")
+    st.markdown("---")
     if st.button("Sair", use_container_width=True):
         logout()
 if not loja:
-    st.warning("Selecione uma loja no menu lateral.")
+    render_alert("Selecione uma loja no menu lateral.", "warning")
     st.stop()
 
 s = datetime.combine(sd, datetime.min.time())
@@ -60,10 +62,10 @@ st.caption(str(loja) + "  ·  " + str(sd) + " → " + str(ed))
 st.markdown("---")
 
 c1,c2,c3,c4 = st.columns(4)
-with c1: st.plotly_chart(gauge(round(disp,1), "Disponibilidade", (80,95)), use_container_width=True)
-with c2: st.plotly_chart(gauge(round(rev*20,1), "Review (x20)", (70,85)), use_container_width=True)
-with c3: st.plotly_chart(gauge(round(max(0, 100-nre*5),1), "NRE Score", (50,75)), use_container_width=True)
-with c4: st.plotly_chart(gauge(round(max(0, 100-max(0,dct)*5),1), "Delta CT Score", (50,75)), use_container_width=True)
+with c1: st.plotly_chart(gauge(round(disp,1), "Disponibilidade", (80,95)), use_container_width=True, theme=None)
+with c2: st.plotly_chart(gauge(round(rev*20,1), "Review (x20)", (70,85)), use_container_width=True, theme=None)
+with c3: st.plotly_chart(gauge(round(max(0, 100-nre*5),1), "NRE Score", (50,75)), use_container_width=True, theme=None)
+with c4: st.plotly_chart(gauge(round(max(0, 100-max(0,dct)*5),1), "Delta CT Score", (50,75)), use_container_width=True, theme=None)
 
 st.markdown("---")
 c1,c2,c3,c4 = st.columns(4)
@@ -75,12 +77,12 @@ with c4: st.markdown(kpi("NRE (tempo na loja)","{:.1f} min".format(nre),   None,
 st.markdown("---")
 st.markdown("### Alertas")
 if disp < 80:
-    st.error("Disponibilidade {:.1f}% — abaixo de 80%. Verificar motivos de fechamento.".format(disp))
+    render_alert("Disponibilidade {:.1f}% — abaixo de 80%. Verificar motivos de fechamento.".format(disp), "error")
 elif disp < 90:
-    st.warning("Disponibilidade {:.1f}% — abaixo da meta de 90%.".format(disp))
+    render_alert("Disponibilidade {:.1f}% — abaixo da meta de 90%.".format(disp), "warning")
 else:
-    st.success("Disponibilidade {:.1f}% — dentro da meta.".format(disp))
+    render_alert("Disponibilidade {:.1f}% — dentro da meta.".format(disp), "success")
 if dct > 10:
-    st.error("Delta CT {:.1f} min — loja prepara muito alem do prometido.".format(dct))
+    render_alert("Delta CT {:.1f} min — loja prepara muito alem do prometido.".format(dct), "error")
 if nre > 12:
-    st.error("NRE {:.1f} min — entregador aguarda demais na loja. Meta: menos de 10 min.".format(nre))
+    render_alert("NRE {:.1f} min — entregador aguarda demais na loja. Meta: menos de 10 min.".format(nre), "error")

@@ -6,8 +6,8 @@ import base64
 from datetime import date
 from utils.auth import check_login, logout
 from utils.data import load_all, get_stores
-from utils.charts import kpi
-from utils.styles import GLOBAL_CSS
+from utils.charts import style_figure, kpi
+from utils.styles import GLOBAL_CSS, render_alert, render_table, render_navigation
 
 st.set_page_config(page_title="Chamados · Doma", page_icon="assets/logo_doma_white.png", layout="wide")
 st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
@@ -36,10 +36,12 @@ with st.sidebar:
                            key="end_global", label_visibility="collapsed")
     st.caption(str(sd) + " -> " + str(ed))
     st.markdown("---")
+    render_navigation("Chamados")
+    st.markdown("---")
     if st.button("Sair", use_container_width=True):
         logout()
 if not loja:
-    st.warning("Selecione uma loja no menu lateral.")
+    render_alert("Selecione uma loja no menu lateral.", "warning")
     st.stop()
 
 df = load_all().get("chamados", pd.DataFrame())
@@ -51,7 +53,7 @@ st.caption(str(loja))
 st.markdown("---")
 
 if df.empty:
-    st.success("Nenhum chamado registrado.")
+    render_alert("Nenhum chamado registrado.", "success")
     st.stop()
 
 if "quantidade" in df.columns:
@@ -69,7 +71,7 @@ with c3: st.markdown(kpi("Em Andamento", str(andamento)), unsafe_allow_html=True
 st.markdown("---")
 cols = [c for c in ["motivo","quantidade","status","data"] if c in df.columns]
 if "quantidade" in df.columns:
-    st.dataframe(df[cols].sort_values("quantidade", ascending=False),
+    render_table(df[cols].sort_values("quantidade", ascending=False),
                  use_container_width=True, hide_index=True)
 
 if "motivo" in df.columns and "quantidade" in df.columns:
@@ -80,4 +82,5 @@ if "motivo" in df.columns and "quantidade" in df.columns:
     fig.update_layout(paper_bgcolor="#1A1A1A", plot_bgcolor="#1A1A1A",
                       font=dict(color="#FFFFFF"), height=320,
                       margin=dict(l=20,r=20,t=20,b=20))
-    st.plotly_chart(fig, use_container_width=True)
+    style_figure(fig)
+    st.plotly_chart(fig, use_container_width=True, theme=None)

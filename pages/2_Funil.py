@@ -6,7 +6,7 @@ from datetime import date, datetime
 from utils.auth import check_login, logout
 from utils.data import load_all, get_stores, agg, prev, delta
 from utils.charts import kpi, funnel
-from utils.styles import GLOBAL_CSS
+from utils.styles import GLOBAL_CSS, render_alert, render_table, render_navigation
 
 st.set_page_config(page_title="Funil · Doma", page_icon="assets/logo_doma_white.png", layout="wide")
 st.markdown(GLOBAL_CSS, unsafe_allow_html=True)
@@ -35,10 +35,12 @@ with st.sidebar:
                            key="end_global", label_visibility="collapsed")
     st.caption(str(sd) + " -> " + str(ed))
     st.markdown("---")
+    render_navigation("Funil")
+    st.markdown("---")
     if st.button("Sair", use_container_width=True):
         logout()
 if not loja:
-    st.warning("Selecione uma loja no menu lateral.")
+    render_alert("Selecione uma loja no menu lateral.", "warning")
     st.stop()
 
 s = datetime.combine(sd, datetime.min.time())
@@ -60,9 +62,9 @@ pvals  = [int(pv.get(k, 0)) for k in keys]
 c1, c2 = st.columns([3, 2])
 with c1:
     if any(v > 0 for v in vals):
-        st.plotly_chart(funnel(etapas, vals, "Funil - " + loja), use_container_width=True)
+        st.plotly_chart(funnel(etapas, vals, "Funil - " + loja), use_container_width=True, theme=None)
     else:
-        st.info("Dados de funil nao disponiveis.")
+        render_alert("Dados de funil nao disponiveis.", "info")
 with c2:
     st.markdown("#### Conversao por Etapa")
     for i in range(len(etapas) - 1):
@@ -86,4 +88,4 @@ for i in range(len(etapas) - 1):
         "Abandono": "{:.1%}".format(pct),
         "Status": "Alto" if pct > 0.5 else ("Medio" if pct > 0.3 else "Ok")
     })
-st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+render_table(pd.DataFrame(rows), use_container_width=True, hide_index=True)
